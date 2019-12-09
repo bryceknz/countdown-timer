@@ -25,17 +25,11 @@ class Countdown extends React.Component {
 
   calculateDiff = (newDate) => {
     const now = moment()
-    console.log('monent()', now)
 
     const days = newDate.diff(now, 'days')
     const hours = newDate.diff(now.add(days, 'days'), 'hours')
     const minutes = newDate.diff(now.add(hours, 'hours'), 'minutes')
     const seconds = newDate.diff(now.add(minutes, 'minutes'), 'seconds')
-
-    console.log(days)
-    console.log(hours)
-    console.log(minutes)
-    console.log(seconds)
 
     this.setState({ days, hours, minutes, seconds })
   }
@@ -45,16 +39,16 @@ class Countdown extends React.Component {
       this.setState({ seconds: this.state.seconds - 1 })
     } else {
       clearInterval(this.timer);
-      // window.location.reload();
     }
   }
 
   render () {
+    const { days, hours, minutes, seconds } = this.state
+
     return (
       <div style={{width: "100%", textAlign: "center"}}>
-        {/* {this.state.futureDate && this.state.futureDate.format('hh')} */}
-        {this.state.seconds
-          ? <h1>{this.state.seconds}...</h1>
+        {(days || hours || minutes || seconds)
+          ? <h1>{days} days, {hours} hours, {minutes} minutes, {seconds} seconds...</h1>
           : <h1>Countdown finished!</h1>}
       </div>
     )
