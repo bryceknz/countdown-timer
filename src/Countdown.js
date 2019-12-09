@@ -1,16 +1,13 @@
 import React from 'react'
 import moment from 'moment'
 
-class Countdown extends React.Component {
+export default class Countdown extends React.Component {
   state = {
-    days: null,
-    hours: null,
-    minutes: null,
-    seconds: null
+    secondsLeft: null
   }
 
   componentDidMount () {
-    const rubbishDay = this.nextDay(this.props.day)
+    const rubbishDay = this.calculateRubbishDay(this.props.day)
     this.calculateDiff(rubbishDay)
 
     this.timer = setInterval(
@@ -19,40 +16,57 @@ class Countdown extends React.Component {
     )
   }
 
-  nextDay = (day) => {
-    return moment().day(day).startOf('day')
+  calculateRubbishDay = (day) => {
+    const nextDay = moment().day(day)
+
+    if (nextDay <= moment.now()) {
+      nextDay.add(1, 'weeks')
+    }
+
+    return nextDay
   }
 
-  calculateDiff = (newDate) => {
-    const now = moment()
-
-    const days = newDate.diff(now, 'days')
-    const hours = newDate.diff(now.add(days, 'days'), 'hours')
-    const minutes = newDate.diff(now.add(hours, 'hours'), 'minutes')
-    const seconds = newDate.diff(now.add(minutes, 'minutes'), 'seconds')
-
-    this.setState({ days, hours, minutes, seconds })
-  }
+  calculateDiff = (newDate) =>
+    this.setState({ secondsLeft: newDate.diff(moment(), 'seconds') })
 
   tick = () => {
-    if (this.state.seconds > 0) {
-      this.setState({ seconds: this.state.seconds - 1 })
+    const { secondsLeft } = this.state
+
+    if (secondsLeft > 0) {
+      this.setState({ secondsLeft: secondsLeft - 1 })
     } else {
-      clearInterval(this.timer);
+      clearInterval(this.timer)
+    }
+  }
+
+  timeBreakdown = () => {
+    const { secondsLeft } = this.state
+
+    const minuteInSecs = 60
+    const hourInSecs = minuteInSecs * 60
+    const dayInSecs = hourInSecs * 24
+
+    return {
+      seconds: Math.floor(secondsLeft % minuteInSecs),
+      minutes: Math.floor(secondsLeft % hourInSecs / minuteInSecs),
+      hours: Math.floor(secondsLeft % dayInSecs / hourInSecs),
+      days: Math.floor(secondsLeft / dayInSecs)
     }
   }
 
   render () {
-    const { days, hours, minutes, seconds } = this.state
+    const { secondsLeft } = this.state
+    const { days, hours, minutes, seconds } = this.timeBreakdown()
 
-    return (
-      <div style={{width: "100%", textAlign: "center"}}>
-        {(days || hours || minutes || seconds)
-          ? <h1>{days} days, {hours} hours, {minutes} minutes, {seconds} seconds...</h1>
-          : <h1>Countdown finished!</h1>}
-      </div>
-    )
+    if (secondsLeft) {
+      return (
+        <>
+          <h1>TOTAL SECONDS: {secondsLeft}</h1>
+          <h2>{days} days, {hours} hours, {minutes} minutes, {seconds} seconds...</h2>
+        </>
+      )
+    } else {
+      return (<h1>Countdown finished!</h1>)
+    }
   }
 }
-
-export default Countdown
