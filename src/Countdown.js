@@ -1,4 +1,4 @@
-import React from "react"
+import React from 'react'
 
 class Countdown extends React.Component {
   state = {
